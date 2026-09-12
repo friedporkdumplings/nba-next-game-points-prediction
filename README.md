@@ -103,7 +103,7 @@ This baseline is intentionally focused on recent box-score data. It does not mod
 
 ## Authors
 
-Jae and Hanzhe
+Zhiyi and Hanzhe
 
 ## Data and API access
 
