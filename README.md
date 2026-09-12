@@ -20,6 +20,12 @@ The included `raw_data.csv` is a reproducible snapshot of NBA player-game statis
 
 The snapshot contains 10,779 player-game observations. It includes conventional box-score metrics, player and team identifiers, and game metadata. Player-game duplicates are removed and minutes are normalized before modeling.
 
+## Exploratory analysis
+
+Data-quality checks found high completeness across most fields. Overtime-related fields are often missing because overtime games are uncommon, rather than because of a broader data-integrity issue. Points and minutes are both strongly right-skewed: most player-game rows have lower scoring totals, while high-usage performances form a long tail. The 90th, 95th, and 99th percentiles of points are 20, 25, and 35, respectively, confirming that the largest scoring outputs are rare but valid observations.
+
+![Distribution of points scored per game](assets/points-distribution.png)
+
 ## Method
 
 The model uses an XGBoost regressor and a chronological holdout split to mirror a real prediction setting and avoid future-data leakage. Features include:
@@ -30,6 +36,30 @@ The model uses an XGBoost regressor and a chronological holdout split to mirror 
 - Leakage-safe rolling opponent allowances and estimated opponent pace.
 
 Past-game features are shifted before use. Current-game box-score columns and identifiers are excluded from the training feature set.
+
+### Player-form features
+
+Recent player performance is a central signal in the model. The examples below show a player's observed scoring series and the five-game rolling-points feature used to describe recent form.
+
+![Player points over time](assets/player-points-over-time.png)
+
+![Five-game rolling points average](assets/rolling-points-average.png)
+
+## Results and interpretation
+
+Model performance is assessed with root mean squared error (RMSE) on the held-out chronological test period. Prediction-versus-actual diagnostics show how closely estimates track observed next-game scoring. The model is generally strongest in typical scoring ranges; rare, extreme scoring performances are more difficult because they depend on contextual factors that box scores alone do not fully capture.
+
+![Predicted versus actual points](assets/predicted-vs-actual.png)
+
+Feature importance emphasizes recent performance and playing-time variables, reflecting that form and opportunity are major drivers of next-game scoring.
+
+![Top 30 feature importances](assets/feature-importance.png)
+
+Error analysis is performed both by player and by scoring outcome. Players with volatile roles or uncertain minutes can be systematically under- or over-predicted. Prediction errors also spread more widely at high actual scoring totals.
+
+![Prediction error versus actual points](assets/prediction-error.png)
+
+![Average prediction error by player](assets/player-error-table.png)
 
 ## Repository contents
 
